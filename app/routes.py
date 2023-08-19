@@ -2,6 +2,7 @@ from flask import render_template, request, redirect, url_for
 from werkzeug.security import generate_password_hash, check_password_hash
 from app import app
 from app import connection
+from app import password_check
 
 @app.route('/')
 def home():
@@ -55,10 +56,22 @@ def register():
         password = request.form['password']
         hashed_password = generate_password_hash(password, method='sha256')
         insert_query = "INSERT INTO users (username, password) VALUES (%s, %s);"
-        with connection.cursor() as cursor:
-            cursor.execute(insert_query, (username, hashed_password))
-            connection.commit()
-        return "User registered successfully"
+
+        if not password_check.is_strong_password(password):
+            return "Your password is not strong enough"
+        else:
+            try:
+                with connection.cursor() as cursor:
+                    cursor.execute(insert_query, (username, hashed_password))
+                    connection.commit()
+                    return "User registered successfully"
+            except Exception as ex:
+                connection.commit()
+                return render_template('register.html')
+
+
+
+
     return render_template('register.html')
 
 
@@ -93,4 +106,3 @@ content_mes = "This is telephone number you can contact us \n +37455977780"
 @app.route('/faq')
 def faq():
     return render_template("faq.html", title="FAQ", content=content_mes)
-
