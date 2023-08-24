@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Flask Chat</title>
+
+</head>
+<body>
+    <div id="chat">
+        <!-- Display area for chat messages -->
+    </div>
+    <input type="text" id="message" placeholder="Type your message">
+    <button onclick="sendMessage()">Send</button>
+
+
+    <h1>User List</h1>
+    <form action="/chat" method="POST">
+        {% for user in users %}
+            <button type="submit" name="selected_user" value="{{ user[0][0]}}">{{ user[0][1] }}</button><br>
+        {% endfor %}
+    </form>
+
+ <script>
+        function sendMessage() {
+            var messageInput = document.getElementById("message");
+            var selectedUser = document.querySelector('input[name="selected_user"]:checked').value;
+
+            // Make an AJAX request to send the message to the server
+            // You can use JavaScript's Fetch API or libraries like Axios
+        }
+    </script>
+</html>

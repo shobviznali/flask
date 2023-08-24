@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Messages</title>
+</head>
+<body>
+    <h1>Messages</h1>
+    <ul>
+    {% for message in messages %}
+        <li>
+            From: {{ message[0] }}<br>
+            Message: {{ message[1] }}<br>
+            Timestamp: {{ message[2] }}
+        </li>
+    {% endfor %}
+    </ul>
+    <a href="{{ url_for('index') }}">Back to Users</a>
+</body>
+</html>

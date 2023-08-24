@@ -1,8 +1,9 @@
-from flask import render_template, request, redirect, url_for
+from flask import render_template, request, redirect, url_for, session
 from werkzeug.security import generate_password_hash, check_password_hash
-from app import app
+from app import app, websocket
 from app import connection
 from app import password_check
+from flask_socketio import emit
 
 @app.route('/')
 def home():
@@ -39,11 +40,14 @@ def login():
         with connection.cursor() as cursor:
             cursor.execute(f"""SELECT password FROM users WHERE username = %s""", (username,))
             hash = cursor.fetchone()
-
+            true = True
             if hash:
                 if check_password_hash(hash[0], password):
                     connection.commit()
-                    return "Login is successfully"
+                    session.get("username")
+                    cursor.execute(f"""UPDATE users SET is_logged_in = %s WHERE username = %s""", (true, username,))
+                    session["username"] = username
+                    return render_template('index.html')
                 else:
                     connection.commit()
                     return "Try again"
@@ -68,6 +72,7 @@ def register():
             except Exception as ex:
                 connection.commit()
                 return render_template('register.html')
+
 
 
 
@@ -106,3 +111,23 @@ content_mes = "This is telephone number you can contact us \n +37455977780"
 @app.route('/faq')
 def faq():
     return render_template("faq.html", title="FAQ", content=content_mes)
+
+
+@app.route('/chat', methods=['GET', 'POST'] )
+def view():
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT id, username FROM users")
+        users = cursor.fetchall()
+        print(users)
+
+        for i in range(len(users)):
+            if session.get('username') in users[i]:
+                sender_id = users[i][0]
+
+        message = request.form.get("message")
+
+        selected_user = request.form.get("selected_user")
+
+        print(message)
+
+    return render_template('chat.html', users=users)
